@@ -1,0 +1,73 @@
+// This robot will move forward at full speed until it comes within 10cm a wall. Then, it will stop and its LED will turn on.
+
+// Import a server library we will use later.
+#include <NewPing.h>
+
+// Define pins and constants for sonar sensor
+const int TRIGGER_PIN = 2;
+const int ECHO_PIN = 4;
+const int MAX_DISTANCE = 200;
+
+// Define pins for LED.
+const int LED_PIN = 7;
+
+// Define pins for each motor.
+// These 2 pins controls the direction of the motor
+const int MOTOR1_FORWARD = 6; // IN1
+const int MOTOR1_BACKWARD = 10; // IN2
+// This pin controls the speed of the motor by adjusting the duty cycle.
+const int MOTOR1_PWM = 3; // ENA
+
+const int MOTOR2_FORWARD = 11; // IN3
+const int MOTOR2_BACKWARD = 8; // IN4
+const int MOTOR2_PWM = 9; // ENB
+
+
+int distance = 0;
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+
+void setup() {
+  // Setup code here runs once:
+  // This setup code allows us to print to the console using Serial.println();
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  // Main code here runs repeatedly:
+  distance = sonar.ping_cm(); //Record distance measured by sonar sensor
+
+  // Check if the distance is greater than 10, and if it is, execute the following code:
+  if (distance > 10 || distance == 0){
+    // Turn off LED.
+    digitalWrite(LED_PIN, LOW);
+    // Setting forward pin to high and backward to low will make motors rotate forward .         
+    digitalWrite(MOTOR1_FORWARD, HIGH);  
+    digitalWrite(MOTOR1_BACKWARD, LOW);
+    // PWM pin can range from 0 (no speed) to 255 (full speed). Here it is set to full speed.
+    analogWrite(MOTOR1_PWM, 180);        
+
+    // Do the same for the right motor
+    digitalWrite(MOTOR2_FORWARD, HIGH);
+    digitalWrite(MOTOR2_BACKWARD, LOW);
+    analogWrite(MOTOR2_PWM, 180);
+  } else {
+    // If distance is not greater than 10, execute the following code:
+    // Turn on LED.                                 
+    digitalWrite(LED_PIN, HIGH);
+    // Setting forward pin to low and backward to low will make the motors stop.        
+    digitalWrite(MOTOR1_FORWARD, LOW);
+    digitalWrite(MOTOR1_BACKWARD, LOW);
+    // The motors will stop if both FORWARD & BACKWARD pin are set to zero, regardless of PWM input.
+    // But setting it to zero is good convention.
+    analogWrite(MOTOR1_PWM, 0);
+
+    // Do the same for the right motor.
+    digitalWrite(MOTOR2_FORWARD, LOW);
+    digitalWrite(MOTOR2_BACKWARD, LOW);
+    analogWrite(MOTOR2_PWM, 0);         
+  }
+  
+  Serial.println(distance);
+  delay(50);                          //Wait .05 secs
+}
